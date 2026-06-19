@@ -33,7 +33,7 @@ def save_data(data):
         json.dump(data, f, indent=2)
 
 
-def buat_sesi_baru(host_id, durasi_menit, channel_id, menu_text, menu_foto_url, catatan_sesi):
+def buat_sesi_baru(host_id, durasi_menit, channel_id, menu_text, menu_foto_urls, catatan_sesi):
     data = load_data()
     sesi_id = data["sesi_terakhir_id"] + 1
     data["sesi_terakhir_id"] = sesi_id
@@ -47,7 +47,7 @@ def buat_sesi_baru(host_id, durasi_menit, channel_id, menu_text, menu_foto_url, 
         "ditutup_pada_real": None,
         "status": "terbuka",
         "menu_text": menu_text,
-        "menu_foto_url": menu_foto_url,
+        "menu_foto_urls": menu_foto_urls,
         "catatan_sesi": catatan_sesi,
         "struk_url": None,
         "keterangan_bayar": None,
@@ -565,6 +565,60 @@ async def tutup(interaction: discord.Interaction, sesi_id: int):
         f"Sesi #{sesi_id} sudah ditutup. Tidak ada lagi yang bisa ikut order.\n"
         f"Jangan lupa kirim struk dan info pembayaran pakai `/struk sesi_id:{sesi_id}` ya."
     )
+
+
+@bot.tree.command(name="bantuan", description="Lihat cara pakai bot Talangin (hanya kamu yang lihat)")
+async def bantuan(interaction: discord.Interaction):
+    embed = discord.Embed(
+        title="🛵 Talangin — Bot bantu group order kantor",
+        description=(
+            "Talangin membantu mencatat siapa ikut order, mengingatkan yang belum bayar, "
+            "dan menyimpan bukti transfer — tanpa host perlu nagih manual satu-satu."
+        ),
+        color=discord.Color.purple()
+    )
+
+    embed.add_field(
+        name="📋 Alur untuk Host",
+        value=(
+            "**1.** `/order` — buka sesi, isi durasi, menu (teks/foto), dan catatan\n"
+            "**2.** Tunggu peserta klik tombol 'Ikut order' sampai waktu habis\n"
+            "**3.** Sesi otomatis tertutup, kamu checkout & bayar di luar bot\n"
+            "**4.** `/struk` — kirim foto/link struk + info pembayaran (rekening/e-wallet)\n"
+            "**5.** Bot otomatis DM semua peserta yang belum bayar, lengkap dengan tombol Bayar\n"
+            "**6.** `/status` — cek siapa sudah/belum bayar, dan lihat bukti transfer lewat dropdown\n"
+            "**7.** `/tutup` — opsional, kalau mau tutup sesi lebih cepat dari waktu yang dijadwalkan"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="🙋 Alur untuk Peserta",
+        value=(
+            "**1.** Klik tombol **'Ikut order'** di pesan sesi, isi menu yang dipesan\n"
+            "**2.** Tunggu host kirim struk — kamu akan dapat **DM otomatis** dari bot\n"
+            "**3.** Klik tombol **'Bayar'** di DM itu, lalu transfer sesuai info yang diberikan\n"
+            "**4.** **Reply DM tersebut dengan foto bukti transfer**\n"
+            "**5.** Selesai! Status kamu otomatis jadi lunas, dan kamu tidak akan di-reminder lagi"
+        ),
+        inline=False
+    )
+
+    embed.add_field(
+        name="⚙️ Daftar command",
+        value=(
+            "`/order` — buka sesi order baru *(host)*\n"
+            "`/struk` — kirim struk & info pembayaran *(host)*\n"
+            "`/status` — lihat status & bukti bayar semua peserta\n"
+            "`/tutup` — tutup sesi manual *(host)*\n"
+            "`/bantuan` — tampilkan pesan ini lagi"
+        ),
+        inline=False
+    )
+
+    embed.set_footer(text="Catatan: pesan ini hanya bisa dilihat oleh kamu.")
+
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 bot.run(TOKEN)
